@@ -1,0 +1,6 @@
+# Configuration Bandit (analyse de sécurité statique - SAST)
+exclude_dirs:
+  - .venv
+  - tests
+  - api
+# Aucune règle désactivée : on veut le signalement le plus large possible.
