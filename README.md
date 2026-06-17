@@ -90,3 +90,51 @@ pip install pytest pytest-cov
 python -m pytest                 # lance la suite
 python -m pytest --cov           # avec la couverture
 ```
+
+## Qualité, sécurité et couverture (SAST / DAST)
+
+Outils utilisés pour mesurer la dette technique, la sécurité et la couverture.
+Tous sont installables via `pip` (cf. `pyproject.toml`, groupe `dev`).
+
+### Couverture de tests (coverage.py / pytest-cov)
+
+```bash
+pip install pytest pytest-cov
+python -m pytest --cov --cov-branch --cov-report=term-missing
+python -m pytest --cov --cov-report=xml      # produit coverage.xml (pour SonarQube)
+```
+
+### Dette technique & qualité
+
+```bash
+pip install radon pylint
+radon mi my_distance/app.py        # indice de maintenabilité
+radon cc -s my_distance/app.py     # complexité cyclomatique
+pylint my_distance/app.py          # note /10 + code smells
+```
+
+### Analyse de sécurité statique — SAST (Bandit)
+
+```bash
+pip install bandit
+bandit -c bandit.yaml -r my_distance            # lecture humaine
+bandit -c bandit.yaml -r my_distance -f json -o bandit-report.json   # pour SonarQube
+```
+
+### Analyse agrégée (SonarQube)
+
+La configuration est dans `sonar-project.properties`. Après avoir généré
+`coverage.xml` et `bandit-report.json` :
+
+```bash
+sonar-scanner            # nécessite un serveur SonarQube accessible
+```
+
+### Analyse dynamique — DAST (OWASP ZAP)
+
+Sur l'application lancée (`flask --app app run`) :
+
+```bash
+docker run -t ghcr.io/zaproxy/zaproxy zap-baseline.py \
+    -t http://host.docker.internal:5000 -r zap-report.html
+```
