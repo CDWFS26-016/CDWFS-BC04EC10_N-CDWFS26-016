@@ -1,0 +1,44 @@
+### Collection de validation de l'API my_distance
+### Compatible REST Client (VS Code) / IntelliJ HTTP Client.
+### Lancer l'app au prealable : (cd my_distance && flask --app app run)
+
+@base = http://127.0.0.1:5000
+
+### 1. Point d'entree (attendu : 200, corps {} )
+GET {{base}}/api
+
+### 2. Historique des distances (attendu : 200, tableau)
+GET {{base}}/api/distances
+
+### 3. Calcul nominal 3-4-5 (attendu : 200, result_distance = 5.0)
+POST {{base}}/api/distance
+Content-Type: application/json
+
+{ "start_point": "0,0", "end_point": "3,4" }
+
+### 4. Calcul exemple du sujet A(2,5) B(1,6) (attendu : 200, result_distance ~= 1.4142)
+POST {{base}}/api/distance
+Content-Type: application/json
+
+{ "start_point": "2,5", "end_point": "1,6" }
+
+### 5. PUT accepte (DEFAUT : se comporte comme POST)
+PUT {{base}}/api/distance
+Content-Type: application/json
+
+{ "start_point": "0,0", "end_point": "3,4" }
+
+### 6. GET sur /api/distance (DEFAUT : 415, lit request.json sans corps)
+GET {{base}}/api/distance
+
+### 7. Cle manquante (DEFAUT : 500 au lieu de 400)
+POST {{base}}/api/distance
+Content-Type: application/json
+
+{ "start_point": "2,5" }
+
+### 8. Coordonnee non numerique (DEFAUT : 500 au lieu de 400)
+POST {{base}}/api/distance
+Content-Type: application/json
+
+{ "start_point": "a,b", "end_point": "1,6" }
