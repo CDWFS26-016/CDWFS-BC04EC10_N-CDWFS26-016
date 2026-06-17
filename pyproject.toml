@@ -1,0 +1,28 @@
+[project]
+name = "my-distance-qa"
+version = "0.1.0"
+description = "Outillage de revue, tests et documentation du projet my_distance"
+requires-python = ">=3.10"
+
+[dependency-groups]
+dev = [
+    "flask>=3.1",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "radon>=6.0",
+    "pylint>=3.0",
+    "bandit>=1.7",
+    "schemathesis>=3.30",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["my_distance"]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["my_distance"]
+omit = ["my_distance/.venv/*", "tests/*"]
+
+[tool.coverage.report]
+show_missing = true
