@@ -1,0 +1,20 @@
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Caches Python
+__pycache__/
+*.py[cod]
+
+# Outils de test / qualite
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.scannerwork/
+
+# Divers
+.DS_Store
+*.log
