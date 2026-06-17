@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: my_distance API
+  version: "1.0.0"
+  description: >
+    API JSON du service de calcul de distance entre deux points d'un plan 2D
+    (théorème de Pythagore). Ce document décrit l'API **telle qu'elle est
+    réellement implémentée** par le développeur principal, y compris ses
+    comportements discutables (signalés dans les descriptions).
+servers:
+  - url: http://127.0.0.1:5000
+    description: Serveur de développement Flask
+
+paths:
+  /api:
+    get:
+      operationId: getApiRoot
+      summary: Point d'entrée de l'API
+      description: Renvoie un objet vide `{}`. Aucune information utile n'est exposée.
+      responses:
+        "200":
+          description: Objet vide
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+
+  /api/distances:
+    get:
+      operationId: listDistances
+      summary: Historique des distances calculées
+      description: >
+        Renvoie la liste des calculs effectués **via le formulaire HTML** (`/`).
+        Le stockage est en mémoire (liste globale) : il est vidé au redémarrage
+        et n'est pas partagé entre processus. Les calculs faits via
+        `POST /api/distance` n'y figurent pas.
+      responses:
+        "200":
+          description: Liste des distances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DistanceRecord"
+
+  /api/distance:
+    post:
+      operationId: calculateDistance
+      summary: Calcule la distance entre deux points
+      description: >
+        Calcule la distance euclidienne. Les points sont transmis sous forme de
+        chaînes `"x,y"`. Le résultat n'est pas persisté.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DistanceRequest"
+            examples:
+              triangle345:
+                value:
+                  start_point: "0,0"
+                  end_point: "3,4"
+      responses:
+        "200":
+          description: Distance calculée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistanceRecord"
+        "415":
+          description: Content-Type non `application/json`
+        "500":
+          description: >
+            Erreur serveur. Survient si une clé manque ou si une coordonnée
+            n'est pas un entier (absence de validation : devrait être un 400).
+    put:
+      operationId: calculateDistancePut
+      summary: Identique à POST (verbe sans signification ici)
+      description: >
+        La route accepte aussi PUT, avec exactement le même comportement que
+        POST. PUT n'a pas de sens pour un calcul sans effet de bord.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DistanceRequest"
+      responses:
+        "200":
+          description: Distance calculée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistanceRecord"
+    get:
+      operationId: calculateDistanceGet
+      summary: Déclaré mais inutilisable
+      description: >
+        Le verbe GET est déclaré sur la route, mais le handler lit `request.json`
+        et renvoie donc systématiquement **415** en l'absence de corps JSON.
+      responses:
+        "415":
+          description: Content-Type non `application/json`
+
+components:
+  schemas:
+    DistanceRequest:
+      type: object
+      required: [start_point, end_point]
+      properties:
+        start_point:
+          type: string
+          description: Point de départ au format "x,y" (entiers).
+          example: "0,0"
+        end_point:
+          type: string
+          description: Point d'arrivée au format "x,y" (entiers).
+          example: "3,4"
+    DistanceRecord:
+      type: object
+      properties:
+        start_point:
+          type: array
+          items: { type: integer }
+          minItems: 2
+          maxItems: 2
+          example: [0, 0]
+        end_point:
+          type: array
+          items: { type: integer }
+          minItems: 2
+          maxItems: 2
+          example: [3, 4]
+        result_distance:
+          type: number
+          format: double
+          example: 5.0
+        requested_at:
+          type: string
+          description: Horodatage au format RFC 1123 (sérialisation Flask par défaut).
+          example: "Wed, 17 Jun 2026 09:00:00 GMT"
